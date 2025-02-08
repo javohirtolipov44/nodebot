@@ -1,22 +1,27 @@
 import bot from "./bot.js";
-import { Accept } from "./callback.query.js";
+import { Accept, userPremium } from "./callback.query.js";
+import mediaFile from "./file.js";
 import start from "./start.js";
 import path from "node:path";
 
 const HTML = { parse_mode: "HTML" };
 
-bot.on("text", (msg) => {
+bot.on("text", async (msg) => {
   const chatId = msg.from.id;
   const text = msg.text;
+  try {
+    if (text === "/start") {
+      start(msg, chatId);
+    } else {
+      bot.sendMessage(chatId, text);
+    }
 
-  if (text === "/start") {
-    start(msg, chatId);
-  } else {
-    bot.sendMessage(chatId, text);
-  }
-
-  if (text === "asd") {
-    bot.sendMessage(chatId, msg);
+    if (text === "asd") {
+      bot.sendMessage(chatId, msg);
+    }
+  } catch (error) {
+    const Path = import.meta.url;
+    await bot.sendMessage(+process.env.ADMIN, error.message + "\n" + Path);
   }
 });
 
@@ -39,13 +44,19 @@ bot.on("chat_join_request", async (msg) => {
   // }
 });
 
-bot.on("callback_query", (query) => {
+bot.on("callback_query", async (query) => {
   const callbackData = query.data;
-  const message = query.message;
   const userId = query.from.id;
-
-  if (callbackData === "accept") {
-    Accept(bot, userId);
+  try {
+    if (callbackData === "accept") {
+      Accept(bot, userId);
+    }
+    if (callbackData.split(" ")[0] === "vip") {
+      userPremium(bot, callbackData);
+    }
+  } catch (error) {
+    const Path = import.meta.url;
+    await bot.sendMessage(+process.env.ADMIN, error.message + "\n" + Path);
   }
 });
 
@@ -53,9 +64,9 @@ bot.on("photo", (msg) => {
   const chatId = msg.chat.id;
   const photo = msg.photo[msg.photo.length - 1];
   const fileId = photo.file_id;
-  console.log(msg);
+  // console.log(msg);
 
-  bot.sendMessage(chatId, fileId);
+  mediaFile(bot, chatId, fileId);
 
   // kod yozzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 });

@@ -21,6 +21,7 @@ const start = async (msg, chatId) => {
       chatId,
       created: Date.now(),
       username: msg.from.username || "",
+      file: "",
     });
 
     await io.writeFile("users.json", users);
