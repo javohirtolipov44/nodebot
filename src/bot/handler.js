@@ -47,12 +47,15 @@ bot.on("chat_join_request", async (msg) => {
 bot.on("callback_query", async (query) => {
   const callbackData = query.data;
   const userId = query.from.id;
+  const messageId = query.message.message_id;
   try {
     if (callbackData === "accept") {
       Accept(bot, userId);
     }
-    if (callbackData.split(" ")[0] === "vip") {
-      userPremium(bot, callbackData);
+    if (callbackData.split(" ")[0] === "vip" && userId === +process.env.ADMIN) {
+      const fileId =
+        query.message.photo[query.message.photo.length - 1].file_id;
+      userPremium(bot, callbackData, fileId, userId, messageId);
     }
   } catch (error) {
     const Path = import.meta.url;

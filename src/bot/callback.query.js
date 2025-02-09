@@ -1,5 +1,6 @@
 import { keyb2 } from "../keyboard/inline.js";
 import Io from "../utils/io.js";
+import formatDate from "../utils/time.js";
 
 const io = new Io();
 
@@ -15,9 +16,9 @@ const Accept = (bot, userId) => {
   bot.sendMessage(userId, txt, OPTION);
 };
 
-const userPremium = async (bot, callbackData) => {
-  const id = callbackData.split(" ")[1];
-  const month = callbackData.split(" ")[2];
+const userPremium = async (bot, callbackData, fileId, userId, messageId) => {
+  const id = +callbackData.split(" ")[1];
+  const month = +callbackData.split(" ")[2];
   const premiums = await io.readFile("premium.json");
   const premium = premiums.find((value) => value.chatId === id);
 
@@ -30,19 +31,28 @@ const userPremium = async (bot, callbackData) => {
       chatId: id,
       start,
       end,
-      file: "",
+      file: fileId,
     });
 
     await io.writeFile("premium.json", premiums);
-    // bot.sendMessage(chatId, text, OPTION);
+    await bot.deleteMessage(userId, messageId);
+    const txt = `<b>tg://user?id=${id}\nFoydalanuvchi qo'shildi\nStart: ${formatDate(
+      start
+    )}\nEnd: ${formatDate(end)}</b>`;
+    await bot.sendMessage(userId, txt, { parse_mode: "HTML" });
   } else {
     let new_start = new Date(premium.end);
-    console.log(new_start);
     new_start.setMonth(new_start.getMonth() + month);
     const end = new_start.getTime();
     premium.start = premium.end;
     premium.end = end;
+    premium.file = fileId;
     await io.writeFile("premium.json", premiums);
+    await bot.deleteMessage(userId, messageId);
+    const txt = `<b>tg://user?id=${id}\nFoydalanuvchi qo'shildi\nStart: ${formatDate(
+      premium.start
+    )}\nEnd: ${formatDate(premium.end)}</b>`;
+    await bot.sendMessage(userId, txt, { parse_mode: "HTML" });
   }
 };
 
