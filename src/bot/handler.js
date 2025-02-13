@@ -2,7 +2,6 @@ import bot from "./bot.js";
 import { Accept, userPremium } from "./callback.query.js";
 import mediaFile from "./file.js";
 import start from "./start.js";
-import path from "node:path";
 
 const HTML = { parse_mode: "HTML" };
 

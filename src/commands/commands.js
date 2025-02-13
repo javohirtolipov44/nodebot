@@ -5,10 +5,6 @@ function commands(bot) {
       description: "Qayta ishga tushirish",
     },
     {
-      command: "referal",
-      description: "Obunachi toplash",
-    },
-    {
       command: "info",
       description: "Yordam",
     },
