@@ -17,7 +17,7 @@ const boostrtap = async () => {
       console.log("server is running:", PORT);
     });
   } catch (error) {
-    console.error(error.message);
+    // console.log(error.message);
   }
 };
 

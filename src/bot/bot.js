@@ -6,6 +6,4 @@ const bot = new TelegramBot(token, {
   polling: true,
 });
 
-commands(bot);
-
 export default bot;

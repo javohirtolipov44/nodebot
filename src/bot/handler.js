@@ -33,14 +33,6 @@ bot.on("chat_join_request", async (msg) => {
     const Path = import.meta.url;
     await bot.sendMessage(+process.env.ADMIN, error.message + "\n" + Path);
   }
-
-  // try {
-  //   await bot.approveChatJoinRequest(chatId, userId);
-  //   console.log(`${userId} foydalanuvchisi guruhga qo'shildi`);
-  // } catch (error) {
-  //   const Path = import.meta.url;
-  //   await bot.sendMessage(+process.env.ADMIN, error.message + "\n" + Path);
-  // }
 });
 
 bot.on("callback_query", async (query) => {
@@ -66,9 +58,8 @@ bot.on("photo", (msg) => {
   const chatId = msg.chat.id;
   const photo = msg.photo[msg.photo.length - 1];
   const fileId = photo.file_id;
-  // console.log(msg);
 
-  mediaFile(bot, chatId, fileId);
+  mediaFile(bot, chatId, fileId, msg);
 
   // kod yozzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 });

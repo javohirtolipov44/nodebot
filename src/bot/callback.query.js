@@ -1,4 +1,5 @@
 import { keyb2 } from "../keyboard/inline.js";
+import premiumModel from "../models/premiums.model.js";
 import Io from "../utils/io.js";
 import formatDate from "../utils/time.js";
 
@@ -19,39 +20,55 @@ const Accept = (bot, userId) => {
 const userPremium = async (bot, callbackData, fileId, userId, messageId) => {
   const id = +callbackData.split(" ")[1];
   const month = +callbackData.split(" ")[2];
-  const premiums = await io.readFile("premium.json");
-  const premium = premiums.find((value) => value.chatId === id);
+  const premium = await premiumModel.findOne({ chatId: id });
 
   if (!premium) {
     const start = Date.now();
     let new_start = new Date(start);
     new_start.setMonth(new_start.getMonth() + month);
     const end = new_start.getTime();
-    premiums.push({
+    await premiumModel.create({
       chatId: id,
       start,
       end,
       file: fileId,
     });
+    const result = await bot.approveChatJoinRequest(process.env.CHANEL_ID, id);
+    console.log(result);
 
-    await io.writeFile("premium.json", premiums);
     await bot.deleteMessage(userId, messageId);
-    const txt = `<b>tg://user?id=${id}\nFoydalanuvchi qo'shildi\nStart: ${formatDate(
+    const txt = `<b>tg://user?id=${id}\n<blockquote>Foydalanuvchi qo'shildi</blockquote>\nStart: ${formatDate(
       start
     )}\nEnd: ${formatDate(end)}</b>`;
     await bot.sendMessage(userId, txt, { parse_mode: "HTML" });
   } else {
     let new_start = new Date(premium.end);
+
     new_start.setMonth(new_start.getMonth() + month);
     const end = new_start.getTime();
-    premium.start = premium.end;
-    premium.end = end;
-    premium.file = fileId;
-    await io.writeFile("premium.json", premiums);
+    const updatePremium = await premiumModel.findOneAndUpdate(
+      { chatId: id },
+      {
+        start: premium.end,
+        end,
+        file: fileId,
+      },
+      { new: true }
+    );
+    try {
+      const result = await bot.approveChatJoinRequest(
+        process.env.CHANEL_ID,
+        id
+      );
+      console.log(result);
+    } catch (error) {
+      console.log(error.response.message);
+      console.log("xatolik");
+    }
     await bot.deleteMessage(userId, messageId);
-    const txt = `<b>tg://user?id=${id}\nFoydalanuvchi qo'shildi\nStart: ${formatDate(
-      premium.start
-    )}\nEnd: ${formatDate(premium.end)}</b>`;
+    const txt = `<b>tg://user?id=${id}\n<blockquote>Foydalanuvchi qo'shildi</blockquote>\nStart: ${formatDate(
+      updatePremium.start
+    )}\nEnd: ${formatDate(updatePremium.end)}</b>`;
     await bot.sendMessage(userId, txt, { parse_mode: "HTML" });
   }
 };

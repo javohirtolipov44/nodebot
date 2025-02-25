@@ -2,18 +2,21 @@ import { Schema, model } from "mongoose";
 
 const userSchema = new Schema(
   {
-    name: { type: String },
     chatId: { type: Number },
-    phone: { type: String, default: "998901234567" },
-    admin: { type: Boolean, default: false },
-    action: { type: String, default: false },
-    status: { type: Boolean, default: true },
-    createdAt: { type: Date, default: Date.now() },
+    created: { type: Date, default: Date.now() },
+    username: { type: String, default: "" },
+    file: { type: String, default: "" },
   },
   {
     versionKey: false,
   }
 );
+
+userSchema.methods.getFormattedStart = function () {
+  return new Date(this.start).toLocaleString("uz-UZ", {
+    timeZone: "Asia/Tashkent",
+  });
+};
 
 const userModel = model("users", userSchema);
 
