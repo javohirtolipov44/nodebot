@@ -18,6 +18,17 @@ const Accept = async (bot, userId, messageId) => {
   await bot.deleteMessage(userId, messageId);
 };
 
+const Cancel = async (bot, messageId, callbackData) => {
+  const id = +callbackData.split(" ")[1];
+
+  const OPTION = {
+    parse_mode: "HTML",
+  };
+  const txt = `<b>❌So'rovingiz rad etildi❌\n\nIltimos chekni tekshirib ko'ring</b>`;
+  await bot.sendMessage(id, txt, OPTION);
+  await bot.deleteMessage(process.env.ADMIN, messageId);
+};
+
 const userPremium = async (bot, callbackData, fileId, messageId) => {
   const id = +callbackData.split(" ")[1];
   const month = +callbackData.split(" ")[2];
@@ -106,4 +117,4 @@ const userPremium = async (bot, callbackData, fileId, messageId) => {
   }
 };
 
-export { Accept, userPremium };
+export { Accept, userPremium, Cancel };

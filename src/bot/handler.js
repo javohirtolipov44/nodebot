@@ -1,5 +1,5 @@
 import bot from "./bot.js";
-import { Accept, userPremium } from "./callback.query.js";
+import { Accept, Cancel, userPremium } from "./callback.query.js";
 import mediaFile from "./file.js";
 import start from "./start.js";
 
@@ -42,6 +42,17 @@ bot.on("callback_query", async (query) => {
   try {
     if (callbackData === "accept") {
       Accept(bot, userId, messageId);
+    }
+    if (callbackData === "card") {
+      await bot.copyMessage(
+        userId,
+        process.env.INFO_CHANEL_ID,
+        +process.env.M_ID
+      );
+      await bot.deleteMessage(userId, messageId);
+    }
+    if (callbackData.split(" ")[0] === "cancel") {
+      Cancel(bot, messageId, callbackData);
     }
     if (callbackData.split(" ")[0] === "vip" && userId === +process.env.ADMIN) {
       const fileId =
