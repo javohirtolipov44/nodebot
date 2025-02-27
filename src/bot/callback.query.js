@@ -5,7 +5,7 @@ import formatDate from "../utils/time.js";
 
 const io = new Io();
 
-const Accept = (bot, userId) => {
+const Accept = async (bot, userId, messageId) => {
   const OPTION = {
     parse_mode: "HTML",
     disable_web_page_preview: true,
@@ -14,10 +14,11 @@ const Accept = (bot, userId) => {
     },
   };
   const txt = `<b>Chekda aniq sana va vaqt, summa hamda o'tkazilgan karta raqam bo'lishi kerak!\n\n<i><u>Ps: bittadan ortiq rasm jo'natishga to'g'ri kelsa, donalab yuboring! Guruhlab yuborsangiz bot javob qaytarmaydi!</u></i></b>`;
-  bot.sendMessage(userId, txt, OPTION);
+  await bot.sendMessage(userId, txt, OPTION);
+  await bot.deleteMessage(userId, messageId);
 };
 
-const userPremium = async (bot, callbackData, fileId, userId, messageId) => {
+const userPremium = async (bot, callbackData, fileId, messageId) => {
   const id = +callbackData.split(" ")[1];
   const month = +callbackData.split(" ")[2];
   const premium = await premiumModel.findOne({ chatId: id });
@@ -27,20 +28,56 @@ const userPremium = async (bot, callbackData, fileId, userId, messageId) => {
     let new_start = new Date(start);
     new_start.setMonth(new_start.getMonth() + month);
     const end = new_start.getTime();
-    await premiumModel.create({
-      chatId: id,
-      start,
-      end,
-      file: fileId,
-    });
-    const result = await bot.approveChatJoinRequest(process.env.CHANEL_ID, id);
-    console.log(result);
+    try {
+      const result = await bot.approveChatJoinRequest(
+        process.env.CHANEL_ID,
+        id
+      );
 
-    await bot.deleteMessage(userId, messageId);
-    const txt = `<b>tg://user?id=${id}\n<blockquote>Foydalanuvchi qo'shildi</blockquote>\nStart: ${formatDate(
-      start
-    )}\nEnd: ${formatDate(end)}</b>`;
-    await bot.sendMessage(userId, txt, { parse_mode: "HTML" });
+      if (result) {
+        await premiumModel.create({
+          chatId: id,
+          start,
+          end,
+          file: fileId,
+        });
+
+        await bot.deleteMessage(process.env.ADMIN, messageId);
+        const txt = `<b>tg://user?id=${id}\n<blockquote>Foydalanuvchi qo'shildi</blockquote>\nStart: ${formatDate(
+          start
+        )}\nEnd: ${formatDate(end)}</b>`;
+        await bot.sendMessage(process.env.ADMIN, txt, { parse_mode: "HTML" });
+
+        const txt2 = `<b><blockquote>Obuna muddati:</blockquote>\nStart: ${formatDate(
+          start
+        )}\nEnd: ${formatDate(end)}\n${process.env.PREMIUM}</b>`;
+        await bot.sendMessage(id, txt2, { parse_mode: "HTML" });
+      } else {
+        await bot.sendMessage(
+          process.env.ADMIN,
+          "<b>❗❗Xatolik yuz berdi darhol dasturchiga xabar bering❗❗\nXatolik:callback.qury.js 57-qator</b>",
+          { parse_mode: "HTML" }
+        );
+      }
+    } catch (error) {
+      if (
+        error.message === "ETELEGRAM: 400 Bad Request: HIDE_REQUESTER_MISSING"
+      ) {
+        await bot.sendMessage(
+          process.env.ADMIN,
+          `tg://user?id=${id}\n❗Kanalga so'rov jo'natmagan❗`
+        );
+        await bot.sendMessage(
+          id,
+          `❗️Iltimos kanalga so'rov jo'nating❗️\n${process.env.PREMIUM}`
+        );
+      } else {
+        await bot.sendMessage(
+          process.env.ADMIN,
+          `tg://user?id=${id}\n${error.message}`
+        );
+      }
+    }
   } else {
     let new_start = new Date(premium.end);
 
@@ -55,21 +92,17 @@ const userPremium = async (bot, callbackData, fileId, userId, messageId) => {
       },
       { new: true }
     );
-    try {
-      const result = await bot.approveChatJoinRequest(
-        process.env.CHANEL_ID,
-        id
-      );
-      console.log(result);
-    } catch (error) {
-      console.log(error.response.message);
-      console.log("xatolik");
-    }
-    await bot.deleteMessage(userId, messageId);
-    const txt = `<b>tg://user?id=${id}\n<blockquote>Foydalanuvchi qo'shildi</blockquote>\nStart: ${formatDate(
+
+    await bot.deleteMessage(process.env.ADMIN, messageId);
+    const txt = `<b>tg://user?id=${id}\n<blockquote>Obunasi uzaydi</blockquote>\nStart: ${formatDate(
       updatePremium.start
     )}\nEnd: ${formatDate(updatePremium.end)}</b>`;
-    await bot.sendMessage(userId, txt, { parse_mode: "HTML" });
+    await bot.sendMessage(process.env.ADMIN, txt, { parse_mode: "HTML" });
+
+    const txt2 = `<b><blockquote>Obuna muddati uzaydi:</blockquote>\nStart: ${formatDate(
+      updatePremium.start
+    )}\nEnd: ${formatDate(updatePremium.end)}\n${process.env.PREMIUM}</b>`;
+    await bot.sendMessage(id, txt2, { parse_mode: "HTML" });
   }
 };
 

@@ -14,4 +14,7 @@ const keyb3 = (chatId) => [
   [{ text: "🚫Ban berish🚫", callback_data: `ban` }],
 ];
 
-export { keyb1, keyb2, keyb3 };
+const keyb4 = [[{ text: "✅OBUNANI UZAYTIRISH✅", callback_data: "accept" }]];
+const keyb5 = [[{ text: "✅OBUNA OLISH✅", callback_data: "accept" }]];
+
+export { keyb1, keyb2, keyb3, keyb4, keyb5 };

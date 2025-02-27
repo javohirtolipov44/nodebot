@@ -33,8 +33,8 @@ const mediaFile = async (bot, chatId, fileId, msg) => {
     },
   });
 
-  const text = `Tez orada so'rovingizga javob beramiz!\n\nTushunmovchiliklarni oldini olish maqsadida PREMIUM Kanalga so'rov yuborganingizni yana bir bor tekshirib ko'rishingizni so'raymiz!\n\n${process.env.PREMIUM}`;
-  bot.sendMessage(chatId, text);
+  const text = `<b>Tez orada so'rovingizga javob beramiz!\n\nTushunmovchiliklarni oldini olish maqsadida PREMIUM Kanalga so'rov yuborganingizni yana bir bor tekshirib ko'rishingizni so'raymiz!\n\n${process.env.PREMIUM}</b>`;
+  bot.sendMessage(chatId, text, { parse_mode: "HTML" });
 };
 
 export default mediaFile;

@@ -41,12 +41,12 @@ bot.on("callback_query", async (query) => {
   const messageId = query.message.message_id;
   try {
     if (callbackData === "accept") {
-      Accept(bot, userId);
+      Accept(bot, userId, messageId);
     }
     if (callbackData.split(" ")[0] === "vip" && userId === +process.env.ADMIN) {
       const fileId =
         query.message.photo[query.message.photo.length - 1].file_id;
-      userPremium(bot, callbackData, fileId, userId, messageId);
+      userPremium(bot, callbackData, fileId, messageId);
     }
   } catch (error) {
     const Path = import.meta.url;
